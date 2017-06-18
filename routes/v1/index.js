@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const rss = require('../../lib/rss');
 const BadRequestError = require('../../lib/errors/BadRequestError');
+const NotFoundError = require('../../lib/errors/NotFoundError');
+const sources = require('./sources');
 
 router.get('/', (req, res) => {
   res.send({
@@ -8,9 +10,24 @@ router.get('/', (req, res) => {
   });
 });
 
-router.get('/sources/nytimes/articles', function (req, res) {
-  rss.getArticles('http://www.nytimes.com/services/xml/rss/nyt/World.xml', (err, articles) => {
+router.get('/sources', function (req, res) {
+  const sourceArr = [];
+  Object.keys(sources).forEach(key => {
+    sourceArr.push(Object.assign({key: key}, sources[key]));
+  });
+  res.send({
+    sources: sourceArr
+  });
+});
+
+router.get('/sources/:source/articles', function (req, res) {
+  const source = sources[req.params.source];
+  if (!source) {
+    throw new NotFoundError('Source Not Found');
+  }
+  rss.getArticles(source.feed, (err, articles) => {
     res.send({
+      source: req.params.source,
       articles: articles
     });
   });
@@ -20,7 +37,7 @@ router.get('/articles', function (req, res) {
   const feed = req.query.feed;
 
   if (!feed) {
-    throw new BadRequestError('Missing feed');
+    throw new BadRequestError('Missing feed Parameter');
   }
 
   rss.getArticles(feed, (err, articles) => {
