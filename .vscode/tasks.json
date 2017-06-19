@@ -13,6 +13,7 @@
     },
     {
       "taskName": "start",
+      "isBuildCommand": true,
       "args": ["start"]
     },
     {

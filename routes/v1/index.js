@@ -20,6 +20,13 @@ router.get('/sources', function (req, res) {
   });
 });
 
+router.get('/sources/:source', function (req, res) {
+  const source = req.params.source;
+  res.send({
+    sources: [Object.assign({ key: source }, sources[source])]
+  });
+});
+
 router.get('/sources/:source/articles', function (req, res) {
   const source = sources[req.params.source];
   if (!source) {
