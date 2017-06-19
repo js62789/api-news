@@ -35,7 +35,7 @@ router.get('/sources/:source/articles', function (req, res) {
   rss.getArticles(source.feed, (err, articles) => {
     res.send({
       source: req.params.source,
-      articles: articles
+      articles: rss.simplifyArticles(articles)
     });
   });
 });
@@ -49,7 +49,7 @@ router.get('/articles', function (req, res) {
 
   rss.getArticles(feed, (err, articles) => {
     res.send({
-      articles: articles
+      articles: rss.simplifyArticles(articles)
     });
   });
 });
