@@ -19,6 +19,7 @@
     "express": "^4.15.3",
     "feedparser": "^2.2.0",
     "lodash": "^4.17.4",
+    "metascraper": "^1.0.6",
     "request": "^2.81.0"
   }
 }

@@ -32,12 +32,13 @@ router.get('/sources/:source/articles', function (req, res) {
   if (!source) {
     throw new NotFoundError('Source Not Found');
   }
-  rss.getArticles(source.feed, (err, articles) => {
-    res.send({
-      source: req.params.source,
-      articles: rss.simplifyArticles(articles)
+  rss.getArticles(source.feed)
+    .then((articles) => {
+      res.send({
+        source: req.params.source,
+        articles: articles
+      });
     });
-  });
 });
 
 router.get('/articles', function (req, res) {
@@ -47,11 +48,12 @@ router.get('/articles', function (req, res) {
     throw new BadRequestError('Missing feed Parameter');
   }
 
-  rss.getArticles(feed, (err, articles) => {
-    res.send({
-      articles: rss.simplifyArticles(articles)
+  return rss.getArticles(feed)
+    .then((articles) => {
+      res.send({
+        articles: articles
+      });
     });
-  });
 });
 
 module.exports = router;
