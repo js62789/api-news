@@ -22,7 +22,8 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  res.status(err.code).send({
+  console.error(err);
+  res.status(err.code || 500).send({
     error: err
   });
 });
