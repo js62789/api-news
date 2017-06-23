@@ -63,13 +63,10 @@ router.get('/articles', function (req, res) {
 router.get('/articles/:article_id', function (req, res) {
   const guid = req.params.article_id;
 
-  return rss.readArticle(guid)
+  return rss.readAndFetchArticle(guid)
     .then((article) => {
       res.send({
-        articles: [{
-          title: article.title,
-          content: article.content
-        }]
+        articles: [article]
       });
     });
 });
