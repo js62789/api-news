@@ -29,13 +29,14 @@ router.get('/sources/:source', function (req, res) {
 
 router.get('/sources/:source/articles', function (req, res) {
   const limit = req.query.limit;
+  const after = req.query.after;
   const source = sources[req.params.source];
 
   if (!source) {
     throw new NotFoundError('Source Not Found');
   }
 
-  rss.getArticles(source.feed, limit)
+  rss.getArticles(source.feed, { limit, after })
     .then((articles) => {
       res.send({
         source: req.params.source,
@@ -47,12 +48,13 @@ router.get('/sources/:source/articles', function (req, res) {
 router.get('/articles', function (req, res) {
   const feed = req.query.feed;
   const limit = req.query.limit;
+  const after = req.query.after;
 
   if (!feed) {
     throw new BadRequestError('Missing feed Parameter');
   }
 
-  return rss.getArticles(feed, limit)
+  return rss.getArticles(feed, { limit, after })
     .then((articles) => {
       res.send({
         articles: articles
