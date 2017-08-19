@@ -25,6 +25,15 @@
       "args": ["run", "docker:run"]
     },
     {
+      "taskName": "mock",
+      "args": ["start"],
+      "options": {
+        "env": {
+          "MOCK": "true"
+        }
+      }
+    },
+    {
       "taskName": "test",
       "args": ["run", "test"]
     }
