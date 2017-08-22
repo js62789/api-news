@@ -6,5 +6,8 @@
   },
   "cache": {
     "expiry": 60
+  },
+  "log": {
+    "mode": "dev"
   }
 }
