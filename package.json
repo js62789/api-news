@@ -8,6 +8,8 @@
     "docker": "npm run docker:build && npm run docker:run",
     "docker:build": "docker build -t news_webapi .",
     "docker:run": "docker run -it --rm -p 3002:3002 --name=news_webapi news_webapi",
+    "redis:start": "docker run --name news_redis --rm -d -p 6379:6379 redis:alpine",
+    "redis:stop": "docker stop news_redis",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -21,6 +23,7 @@
     "lodash": "^4.17.4",
     "metascraper": "^1.0.6",
     "morgan": "^1.8.2",
+    "redis": "^2.8.0",
     "request": "^2.81.0"
   }
 }

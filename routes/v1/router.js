@@ -3,6 +3,9 @@ const rss = require('../../lib/rss');
 const BadRequestError = require('../../lib/errors/BadRequestError');
 const NotFoundError = require('../../lib/errors/NotFoundError');
 const sources = require('./sources');
+const cache = require('./cache');
+
+router.use(cache);
 
 router.get('/', (req, res) => {
   res.send({
@@ -32,7 +35,7 @@ router.get('/sources/:source/articles', function (req, res) {
   if (!source) {
     throw new NotFoundError('Source Not Found');
   }
-  rss.getArticles(source.feed)
+  return rss.getArticles(source.feed)
     .then((articles) => {
       res.send({
         source: req.params.source,
