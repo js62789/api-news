@@ -1,11 +1,14 @@
 const router = require('express').Router();
+const config = require('config');
 const rss = require('../../lib/rss');
 const BadRequestError = require('../../lib/errors/BadRequestError');
 const NotFoundError = require('../../lib/errors/NotFoundError');
 const sources = require('./sources');
 const cache = require('./cache');
 
-router.use(cache);
+if (config.has('redis')) {
+  router.use(cache);
+}
 
 router.get('/', (req, res) => {
   res.send({
