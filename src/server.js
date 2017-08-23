@@ -23,12 +23,11 @@ app.get('/', (req, res) => {
 
 app.use('/v1/', require('./routes/v1'));
 
-app.use((req, res, next) => {
+app.use(() => {
   throw new NotFoundError();
 });
 
 app.use((err, req, res, next) => {
-  console.error(err);
   res.status(err.code || 500).send({
     error: err
   });
