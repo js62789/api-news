@@ -88,13 +88,20 @@ const attachMetadata = article => {
     .catch(e => { throw e; });
 };
 
-const getArticles = feed => {
+const getArticles = (feed, options) => {
   return fetchArticles(feed)
+    .then(articles => {
+      if (options && options.limit && options.limit < articles.length) {
+        return articles.splice(0, options.limit);
+      } else {
+        return articles;
+      }
+    })
     .then(articles => Promise.all(articles.map(simplifyArticle).map(attachMetadata)));
 };
 
 const getArticle = url => {
-  return attachMetadata({ url });
+  return attachMetadata({ link: url });
 };
 
 module.exports = {

@@ -1,10 +1,12 @@
 const router = require('express').Router();
 const config = require('config');
-const rss = require('../../lib/rss');
 const BadRequestError = require('../../lib/errors/BadRequestError');
 const NotFoundError = require('../../lib/errors/NotFoundError');
-const sources = require('./sources');
 const cache = require('./cache');
+const getSources = require('./data').getSources;
+const getSource = require('./data').getSource;
+const getArticle = require('./data').getArticle;
+const getArticlesFromFeed = require('./data').getArticlesFromFeed;
 
 if (config.has('redis')) {
   router.use(cache);
@@ -17,33 +19,41 @@ router.get('/', (req, res) => {
 });
 
 router.get('/sources', function (req, res) {
-  const sourceArr = [];
-  Object.keys(sources).forEach(key => {
-    sourceArr.push(Object.assign({key: key}, sources[key]));
-  });
-  res.send({
-    sources: sourceArr
-  });
+  return getSources()
+    .then(sources => {
+      res.send({
+        sources
+      });
+    });
 });
 
 router.get('/sources/:source', function (req, res) {
-  const source = req.params.source;
-  res.send({
-    sources: [Object.assign({ key: source }, sources[source])]
-  });
+  return getSource(req.params.source)
+    .then(source => {
+      if (!source) {
+        throw new NotFoundError('Source Not Found');
+      }
+      res.send({
+        sources: [ source ]
+      });
+    });
 });
 
 router.get('/sources/:source/articles', function (req, res) {
-  const source = sources[req.params.source];
-  if (!source) {
-    throw new NotFoundError('Source Not Found');
-  }
-  return rss.getArticles(source.feed)
-    .then((articles) => {
-      res.send({
-        source: req.params.source,
-        articles: articles
-      });
+  const sourceKey = req.params.source;
+
+  return getSource(sourceKey)
+    .then(source => {
+      if (!source) {
+        throw new NotFoundError('Source Not Found');
+      }
+      return getArticlesFromFeed(source.feed, req.query.limit)
+        .then((articles) => {
+          res.send({
+            source: sourceKey,
+            articles: articles
+          });
+        });
     });
 });
 
@@ -54,22 +64,16 @@ router.get('/articles', function (req, res) {
     throw new BadRequestError('Missing feed Parameter');
   }
 
-  return rss.getArticles(feed)
+  return getArticlesFromFeed(feed)
     .then((articles) => {
       res.send({
-        articles: articles
+        articles
       });
     });
 });
 
 router.get('/articles/:guid', function (req, res) {
-  const feed = req.query.feed;
-
-  if (!feed) {
-    throw new BadRequestError('Missing feed Parameter');
-  }
-
-  return rss.getArticle(req.params.guid)
+  return getArticle(req.params.guid)
     .then((article) => {
       res.send({
         articles: [ article ]
