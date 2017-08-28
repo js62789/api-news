@@ -2,10 +2,12 @@ const router = require('express').Router();
 const config = require('config');
 const BadRequestError = require('../../lib/errors/BadRequestError');
 const NotFoundError = require('../../lib/errors/NotFoundError');
-const cache = require('./cache');
+const cache = require('../../lib/middleware/cache');
 const getSources = require('./data').getSources;
 const getSource = require('./data').getSource;
-const getArticle = require('./data').getArticle;
+const getFeeds = require('./data').getFeeds;
+const getFeed = require('./data').getFeed;
+const getArticleByGUID = require('./data').getArticleByGUID;
 const getArticlesFromFeed = require('./data').getArticlesFromFeed;
 
 if (config.has('redis')) {
@@ -27,14 +29,35 @@ router.get('/sources', function (req, res) {
     });
 });
 
-router.get('/sources/:source', function (req, res) {
-  return getSource(req.params.source)
+router.get('/sources/:source_id', function (req, res) {
+  return getSource(req.params.source_id)
     .then(source => {
       if (!source) {
-        throw new NotFoundError('Source Not Found');
+        throw new NotFoundError('Feed Not Found');
       }
       res.send({
         sources: [ source ]
+      });
+    });
+});
+
+router.get('/feeds', function (req, res) {
+  return getFeeds()
+    .then(feeds => {
+      res.send({
+        feeds
+      });
+    });
+});
+
+router.get('/feeds/:feed_id', function (req, res) {
+  return getFeed(req.params.feed_id)
+    .then(feed => {
+      if (!feed) {
+        throw new NotFoundError('Source Not Found');
+      }
+      res.send({
+        feeds: [ feed ]
       });
     });
 });
@@ -47,7 +70,7 @@ router.get('/sources/:source/articles', function (req, res) {
       if (!source) {
         throw new NotFoundError('Source Not Found');
       }
-      return getArticlesFromFeed(source.feed, req.query.limit)
+      return getArticlesFromFeed(source.feed_id, req.query.limit)
         .then((articles) => {
           res.send({
             source: sourceKey,
@@ -73,7 +96,7 @@ router.get('/articles', function (req, res) {
 });
 
 router.get('/articles/:guid', function (req, res) {
-  return getArticle(req.params.guid)
+  return getArticleByGUID(req.params.guid)
     .then((article) => {
       res.send({
         articles: [ article ]

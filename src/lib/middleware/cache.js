@@ -13,17 +13,22 @@ client.on('error', function (err) {
 });
 
 module.exports = function(req, res, next) {
+  if (!client.connected) {
+    return next();
+  }
+
   const url = req.url;
+
   client.get(url, function(err, result) {
     if (result) {
       return res.send(JSON.parse(result));
-    } else {
-      const send = res.send.bind(res);
-      res.send = function(body) {
-        client.setex(url, expiry, JSON.stringify(body));
-        send(body);
-      };
-      next();
     }
+
+    const send = res.send.bind(res);
+    res.send = function(body) {
+      client.setex(url, expiry, JSON.stringify(body));
+      send(body);
+    };
+    return next();
   });
 };

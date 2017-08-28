@@ -9,5 +9,19 @@
   },
   "log": {
     "mode": "dev"
+  },
+  "knex": {
+    "debug": "false",
+    "client": "sqlite",
+    "connection": {
+      "filename": "./data/news.sqlite"
+    },
+    "seeds": {
+      "directory": "./data/seeds"
+    },
+    "migrations": {
+      "directory": "./data/migrations",
+      "tableName": "knex_migrations"
+    }
   }
 }
