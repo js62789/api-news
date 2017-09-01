@@ -4,7 +4,8 @@ const BadRequestError = require('../../lib/errors/BadRequestError');
 const NotFoundError = require('../../lib/errors/NotFoundError');
 const cache = require('../../lib/middleware/cache');
 const getSources = require('./data').getSources;
-const getSource = require('./data').getSource;
+const getSourceById = require('./data').getSourceById;
+const getSourceByKey = require('./data').getSourceByKey;
 const getFeeds = require('./data').getFeeds;
 const getFeed = require('./data').getFeed;
 const getArticleByGUID = require('./data').getArticleByGUID;
@@ -29,8 +30,20 @@ router.get('/sources', function (req, res) {
     });
 });
 
+router.get('/sources/:source_id(\\d+)', function (req, res) {
+  return getSourceById(req.params.source_id)
+    .then(source => {
+      if (!source) {
+        throw new NotFoundError('Feed Not Found');
+      }
+      res.send({
+        sources: [ source ]
+      });
+    });
+});
+
 router.get('/sources/:source_id', function (req, res) {
-  return getSource(req.params.source_id)
+  return getSourceByKey(req.params.source_id)
     .then(source => {
       if (!source) {
         throw new NotFoundError('Feed Not Found');
@@ -62,10 +75,10 @@ router.get('/feeds/:feed_id', function (req, res) {
     });
 });
 
-router.get('/sources/:source/articles', function (req, res) {
-  const sourceKey = req.params.source;
+router.get('/sources/:source(\\d+)/articles', function (req, res) {
+  const sourceId = req.params.source;
 
-  return getSource(sourceKey)
+  return getSourceById(sourceId)
     .then(source => {
       if (!source) {
         throw new NotFoundError('Source Not Found');
@@ -73,7 +86,25 @@ router.get('/sources/:source/articles', function (req, res) {
       return getArticlesFromFeed(source.feed_id, req.query.limit)
         .then((articles) => {
           res.send({
-            source: sourceKey,
+            source,
+            articles: articles
+          });
+        });
+    });
+});
+
+router.get('/sources/:source/articles', function (req, res) {
+  const sourceKey = req.params.source;
+
+  return getSourceByKey(sourceKey)
+    .then(source => {
+      if (!source) {
+        throw new NotFoundError('Source Not Found');
+      }
+      return getArticlesFromFeed(source.feed_id, req.query.limit)
+        .then((articles) => {
+          res.send({
+            source,
             articles: articles
           });
         });

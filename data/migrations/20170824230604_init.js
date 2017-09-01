@@ -18,12 +18,11 @@ exports.up = function(knex) {
     .createTableIfNotExists('article', function(table) {
       table.increments('id').primary();
       table.integer('source_id').unsigned().references('id').inTable('source');
-      table.integer('feed_id').unsigned().references('id').inTable('feed');
       table.string('author');
       table.string('date');
-      table.string('pubdate');
+      table.timestamp('pubdate');
       table.string('permalink');
-      table.string('guid');
+      table.string('guid').unique();
       table.string('description');
       table.string('title');
       table.string('image');
@@ -33,7 +32,7 @@ exports.up = function(knex) {
       table.string('summary');
       table.text('content');
     })
-    .createTableIfNotExists('feed_article', function(table) {
+    .createTableIfNotExists('article_feed', function(table) {
       table.increments('id').primary();
       table.integer('feed_id').unsigned().references('id').inTable('feed');
       table.integer('article_id').unsigned().references('id').inTable('article');
@@ -44,5 +43,6 @@ exports.down = function(knex) {
   return knex.schema
     .dropTableIfExists('source')
     .dropTableIfExists('feed')
-    .dropTableIfExists('article');
+    .dropTableIfExists('article')
+    .dropTableIfExists('feed_article');
 };

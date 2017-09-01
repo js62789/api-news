@@ -3,21 +3,20 @@ const Source = require('./models/source');
 const Feed = require('./models/feed');
 const Article = require('./models/article');
 
+/* DATA ACCESS */
+
 const returnJSON = model => model.toJSON();
 
 const getSources = () => {
   return Source.fetchAll().then(returnJSON);
 };
 
-const getSource = (id) => {
-  return Source.where({ id: id }).fetch()
-    .then(source => {
-      if (source) {
-        return source.toJSON();
-      }
+const getSourceById = (id) => {
+  return Source.where({ id }).fetch().then(returnJSON);
+};
 
-      return Source.where({ key: id }).fetch().then(returnJSON);
-    });
+const getSourceByKey = (key) => {
+  return Source.where({ key }).fetch().then(returnJSON);
 };
 
 const getFeeds = () => {
@@ -25,17 +24,20 @@ const getFeeds = () => {
 };
 
 const getFeed = (id) => {
-  return Feed.where({ id: id }).fetch().then(returnJSON);
+  return Feed.where({ id }).fetch().then(returnJSON);
 };
 
 const getArticleByGUID = (guid) => {
-  return Article.where({ guid: guid }).fetch()
+  return Article.where({ guid }).fetch()
+    .then(returnJSON)
     .then(existingArticle => {
+      // TODO Update an article if exists
       if (!existingArticle) {
         const promise = rss.getArticle(guid);
 
+        // Save article to database, but don't wait
         promise.then(article => {
-          Article.forge(article).save();
+          return Article.forge(article).save();
         });
 
         return promise;
@@ -44,36 +46,23 @@ const getArticleByGUID = (guid) => {
 };
 
 const getArticlesFromFeed = (feed_id, limit = 10) => {
-  return Feed.where({ id: feed_id }).fetch().then(feed => {
-    const msSinceLastJob = Date.now() - feed.get('last_job_timestamp');
-    const expiry = 1000 * 60 * 60;
-    if (msSinceLastJob > expiry) {
-      const promise = rss.getArticles(feed.get('url'), { limit });
-
-      promise.then(articles => {
-        Promise.all(articles.map(article => {
-          return Article.where({ guid: article.guid }).fetch()
-            .then(existingArticle => {
-              // TODO Update an article if exists
-              if (!existingArticle) {
-                return Article.forge(article).save({ feed_id: feed.get('id'), source_id: feed.get('source_id') });
-              }
-            });
-        }));
-      })
-      .then(() => {
-        feed.set('last_job_timestamp', Date.now()).save();
-      });
-
-      return promise;
-    } else {
-      return Article.where({ feed_id: feed.get('id') }).fetch().then(returnJSON);
-    }
-  });
+  return Feed.where({ id: feed_id }).fetch()
+    .then(feed => {
+      if (feed.hasExpired()) {
+        return feed.runImport().then(articles => articles.slice(-limit));
+      } else {
+        return feed.articles()
+          .orderBy('date', 'DESC')
+          .query(qb => { qb.limit(limit); })
+          .fetch()
+          .then(returnJSON);
+      }
+    });
 };
 
 module.exports = {
-  getSource,
+  getSourceById,
+  getSourceByKey,
   getSources,
   getFeed,
   getFeeds,

@@ -13,7 +13,7 @@ client.on('error', function (err) {
 });
 
 module.exports = function(req, res, next) {
-  if (!client.connected) {
+  if (!client.connected || req.query.cache === '0') {
     return next();
   }
 
