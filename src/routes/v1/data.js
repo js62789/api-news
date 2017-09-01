@@ -1,3 +1,4 @@
+const read = require('node-readability');
 const rss = require('../../lib/rss');
 const Source = require('./models/source');
 const Feed = require('./models/feed');
@@ -29,8 +30,21 @@ const getFeed = (id) => {
 
 const getArticleByGUID = (guid) => {
   return Article.where({ guid }).fetch()
-    .then(returnJSON)
     .then(existingArticle => {
+      if (existingArticle && !existingArticle.content) {
+        const readFetch = new Promise((resolve, reject) => {
+          read(guid, (err, article) => {
+            if (err) {
+              return reject(err);
+            }
+            resolve(article);
+          });
+        });
+        return readFetch.then(readArticle => {
+          return existingArticle.save({ content: readArticle.content });
+        });
+      }
+
       // TODO Update an article if exists
       if (!existingArticle) {
         const promise = rss.getArticle(guid);
@@ -42,7 +56,8 @@ const getArticleByGUID = (guid) => {
 
         return promise;
       }
-    });
+    })
+    .then(returnJSON);
 };
 
 const getArticlesFromFeed = (feed_id, limit = 10) => {
