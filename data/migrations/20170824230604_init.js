@@ -22,7 +22,7 @@ exports.up = function(knex) {
       table.string('date');
       table.timestamp('pubdate');
       table.string('permalink');
-      table.string('guid').unique();
+      table.string('guid').unique().notNullable();
       table.string('description');
       table.string('title');
       table.string('image');
