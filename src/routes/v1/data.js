@@ -42,7 +42,8 @@ const getArticleByGUID = (guid) => {
         });
         return readFetch.then(readArticle => {
           return existingArticle.save({ content: readArticle.content });
-        });
+        })
+        .then(returnJSON);
       }
 
       // TODO Update an article if exists
@@ -56,8 +57,9 @@ const getArticleByGUID = (guid) => {
 
         return promise;
       }
-    })
-    .then(returnJSON);
+
+      return existingArticle.then(returnJSON);
+    });
 };
 
 const getArticlesFromFeed = (feed_id, limit = 10) => {
