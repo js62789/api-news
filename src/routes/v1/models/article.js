@@ -4,6 +4,8 @@ const Source = require('./source');
 
 module.exports = bookshelf.Model.extend({
 
+  idAttribute: 'guid',
+
   tableName: 'article',
 
   feeds() {
