@@ -30,8 +30,17 @@ const getFeed = (id) => {
 
 const getArticleByGUID = (guid) => {
   return Article.where({ guid }).fetch()
-    .then(existingArticle => {
-      if (existingArticle && !existingArticle.content) {
+    .then(article => {
+      if (!article) {
+        return rss.getArticle(guid).then(article => {
+          return Article.forge(article).save({ guid });
+        });
+      }
+
+      return article;
+    })
+    .then(article => {
+      if (!article.get('content')) {
         const readFetch = new Promise((resolve, reject) => {
           read(guid, (err, article) => {
             if (err) {
@@ -41,25 +50,13 @@ const getArticleByGUID = (guid) => {
           });
         });
         return readFetch.then(readArticle => {
-          return existingArticle.save({ content: readArticle.content });
-        })
-        .then(returnJSON);
-      }
-
-      // TODO Update an article if exists
-      if (!existingArticle) {
-        const promise = rss.getArticle(guid);
-
-        // Save article to database, but don't wait
-        promise.then(article => {
-          return Article.forge(article).save();
+          return article.save({ content: readArticle.content }, { patch: true });
         });
-
-        return promise;
       }
 
-      return existingArticle.then(returnJSON);
-    });
+      return article;
+    })
+    .then(returnJSON);
 };
 
 const getArticlesFromFeed = (feed_id, limit = 10) => {
