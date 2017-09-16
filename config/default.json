@@ -11,7 +11,7 @@
     "mode": "dev"
   },
   "knex": {
-    "debug": "false",
+    "debug": false,
     "client": "sqlite",
     "connection": {
       "filename": "./data/news.sqlite"
