@@ -77,14 +77,23 @@ const simplifyArticle = article => {
   });
 
   simpleArticle.image = article.image.url;
+  simpleArticle.thumbnail = (article['media:thumbnail'] || {}).url;
 
-  return simpleArticle;
+  return Object.assign(simpleArticle, prependPropsWith('rss_')(simpleArticle));
+};
+
+const prependPropsWith = str => obj => {
+  const prependedObj = {};
+  Object.keys(obj).forEach(prop => {
+    prependedObj[`${str}${prop}`] = obj[prop];
+  });
+  return prependedObj;
 };
 
 const attachMetadata = article => {
   return Metascraper
     .scrapeUrl(article.link)
-    .then((metadata) => Object.assign(article, metadata))
+    .then((metadata) => Object.assign(article, metadata, prependPropsWith('scrape_')(metadata)))
     .catch(e => { throw e; });
 };
 

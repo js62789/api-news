@@ -4,12 +4,10 @@ const Source = require('./source');
 
 module.exports = bookshelf.Model.extend({
 
-  idAttribute: 'guid',
-
   tableName: 'article',
 
   feeds() {
-    return this.belongsToMany(Feed);
+    return this.belongsToMany(Feed, 'feed_has_article');
   },
 
   source() {

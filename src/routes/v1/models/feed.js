@@ -18,21 +18,18 @@ module.exports = bookshelf.Model.extend({
 
   runImport() {
     const feed = this;
-    const newArticlesFetch = rss.getArticles(this.get('url'));
+    const newArticlesFetch = rss.getArticles(this.get('url'))
+      .then(articles => articles.map(article => Object.assign(article, {source_id: this.get('source_id')})));
 
     newArticlesFetch
-      .then(feedArticles => {
-        // Attach feed_id and source_id
-        const enhancedArticles = feedArticles.map(newArticle => (
-          Object.assign(newArticle, { source_id: feed.get('source_id') })
-        ));
-
+      .then(articles => {
         // Save articles to the database
-        const saves = enhancedArticles.map(newArticle => Article.forge(newArticle).save());
+        const saves = articles.map(article => (new Article(article)).save(null, { require: false }));
 
         return Promise.all(saves)
           .then(articles => feed.articles().attach(articles))
-          .then(() => this.markImportComplete());
+          .then(() => this.markImportComplete())
+          .catch(e => console.error(e));
       });
 
     return newArticlesFetch;
@@ -43,7 +40,7 @@ module.exports = bookshelf.Model.extend({
   },
 
   articles() {
-    return this.belongsToMany(Article);
+    return this.belongsToMany(Article, 'feed_has_article');
   },
 
   source() {

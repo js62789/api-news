@@ -12,6 +12,7 @@
   },
   "knex": {
     "debug": false,
+    "useNullAsDefault": true,
     "client": "sqlite",
     "connection": {
       "filename": "./data/news.sqlite"
