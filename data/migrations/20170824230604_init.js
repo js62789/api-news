@@ -6,6 +6,7 @@ exports.up = function(knex) {
       table.string('key');
       table.string('name');
       table.string('logo');
+      table.string('icon');
       table.integer('feed_id').unsigned().references('id').inTable('feed');
     })
     .createTableIfNotExists('feed', function(table) {

@@ -10,56 +10,64 @@ exports.seed = function(knex) {
           id: 1,
           key: 'cnn',
           name: 'CNN',
-          logo: 'https://upload.wikimedia.org/wikipedia/commons/8/8b/Cnn.svg',
+          logo: 'cnn.svg',
+          icon: 'cnn-icon.svg',
           feed_id: 1
         },
         {
           id: 2,
           key: 'nytimes',
           name: 'New York Times',
-          logo: 'https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png',
+          logo: 'nytimes.svg',
+          icon: 'nytimes-icon.svg',
           feed_id: 2
         },
         {
           id: 3,
           key: 'wapost',
           name: 'Washington Post',
-          logo: 'https://upload.wikimedia.org/wikipedia/commons/9/93/The_Logo_of_The_Washington_Post_Newspaper.svg',
+          logo: 'wapost.svg',
+          icon: 'wapost-icon.svg',
           feed_id: 3
         },
         {
           id: 4,
           key: 'ap',
           name: 'Associated Press',
-          logo: 'https://upload.wikimedia.org/wikipedia/commons/f/fb/Associated_Press.svg',
+          logo: 'ap.svg',
+          icon: 'ap-icon.svg',
           feed_id: 4
         },
         {
           id: 5,
           key: 'usatoday',
           name: 'USA Today',
-          logo: 'https://upload.wikimedia.org/wikipedia/commons/3/30/USA_Today_2012logo.svg',
+          logo: 'usatoday.svg',
+          icon: 'usatoday-icon.svg',
           feed_id: 5
         },
         {
           id: 6,
           key: 'npr',
           name: 'NPR',
-          logo: 'https://upload.wikimedia.org/wikipedia/commons/d/d7/National_Public_Radio_logo.svg',
+          logo: 'npr.svg',
+          icon: 'npr-icon.svg',
           feed_id: 6
         },
         {
           id: 7,
           key: 'reuters',
           name: 'Reuters',
-          logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a0/Reuters_2008_logo.svg',
+          logo: 'reuters.svg',
+          icon: 'reuters-icon.svg',
           feed_id: 7
         },
         {
           id: 8,
           key: 'bbc',
           name: 'BBC',
-          logo: 'https://upload.wikimedia.org/wikipedia/commons/e/eb/BBC.svg',
+          logo: 'bbc.svg',
+          icon: 'bbc-icon.svg',
           feed_id: 8
         }
       ]);
