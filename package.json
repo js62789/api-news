@@ -10,20 +10,29 @@
     "docker:run": "docker run -it --rm -p 3002:3002 --name=news_webapi news_webapi",
     "redis:start": "docker run --name news_redis --rm -d -p 6379:6379 redis:alpine",
     "redis:stop": "docker stop news_redis",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:migrate": "knex migrate:latest",
+    "db:rollback": "knex migrate:rollback",
+    "db:seed": "knex seed:run",
+    "migration:create": "knex migrate:make",
+    "seed:create": "knex seed:make"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.17.2",
+    "bookshelf": "^0.10.4",
     "config": "^1.26.1",
     "cors": "^2.8.3",
     "express": "^4.15.3",
     "feedparser": "^2.2.0",
+    "knex": "^0.13.0",
     "lodash": "^4.17.4",
     "metascraper": "^1.0.6",
     "morgan": "^1.8.2",
+    "node-readability": "^3.0.0",
     "redis": "^2.8.0",
-    "request": "^2.81.0"
+    "request": "^2.81.0",
+    "sqlite3": "^3.1.9"
   }
 }

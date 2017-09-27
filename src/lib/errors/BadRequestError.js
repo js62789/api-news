@@ -1,7 +1,7 @@
 function BadRequestError(message) {
   this.message = message || 'Bad Request';
   this.stack = new Error().stack;
-  this.code = 400;
+  this.statusCode = 400;
   this.errorType = this.name;
 }
 

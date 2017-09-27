@@ -1,7 +1,7 @@
 function NotFoundError(message) {
   this.message = message || 'Not Found';
   this.stack = new Error().stack;
-  this.code = 404;
+  this.statusCode = 404;
   this.errorType = this.name;
 }
 

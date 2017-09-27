@@ -28,8 +28,10 @@ app.use(() => {
 });
 
 app.use((err, req, res, next) => {
-  res.status(err.code || 500).send({
-    error: err
+  res.status(err.statusCode || 500).send({
+    error: {
+      message: err.message
+    }
   });
 });
 
