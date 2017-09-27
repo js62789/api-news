@@ -12,6 +12,13 @@ module.exports = bookshelf.Model.extend({
 
   articles() {
     return this.hasMany(Article);
+  },
+
+  findOrImportArticles(limit) {
+    return new Feed({ id: this.get('feed_id') }).fetch()
+      .then(feed => {
+        return feed.findOrImportArticles(limit);
+      });
   }
 
 });

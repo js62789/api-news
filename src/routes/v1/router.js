@@ -3,13 +3,9 @@ const config = require('config');
 const BadRequestError = require('../../lib/errors/BadRequestError');
 const NotFoundError = require('../../lib/errors/NotFoundError');
 const cache = require('../../lib/middleware/cache');
-const getSources = require('./data').getSources;
-const getSourceById = require('./data').getSourceById;
-const getSourceByKey = require('./data').getSourceByKey;
-const getFeeds = require('./data').getFeeds;
-const getFeed = require('./data').getFeed;
-const getArticleByGUID = require('./data').getArticleByGUID;
-const getArticlesFromFeed = require('./data').getArticlesFromFeed;
+const Source = require('./models/source');
+const Article = require('./models/article');
+const Feed = require('./models/feed');
 
 if (config.has('redis')) {
   router.use(cache);
@@ -22,96 +18,92 @@ router.get('/', (req, res) => {
 });
 
 router.get('/sources', function (req, res, next) {
-  return getSources()
+  return Source.fetchAll()
     .then(sources => {
       res.send({
-        sources
+        sources: sources.toJSON()
       });
     })
     .catch(next);
 });
 
 router.get('/sources/:source_id(\\d+)', function (req, res, next) {
-  return getSourceById(req.params.source_id)
+  return new Source({ id: req.params.source_id }).fetch()
     .then(source => {
       if (!source) {
         throw new NotFoundError('Source Not Found');
       }
       res.send({
-        sources: [ source ]
+        sources: [ source.toJSON() ]
       });
     })
     .catch(next);
 });
 
-router.get('/sources/:source_id', function (req, res, next) {
-  return getSourceByKey(req.params.source_id)
+router.get('/sources/:source_key', function (req, res, next) {
+  return new Source({ key: req.params.source_key }).fetch()
     .then(source => {
       if (!source) {
         throw new NotFoundError('Feed Not Found');
       }
       res.send({
-        sources: [ source ]
+        sources: [ source.toJSON() ]
       });
     })
     .catch(next);
 });
 
 router.get('/feeds', function (req, res, next) {
-  return getFeeds()
+  return Feed.fetchAll()
     .then(feeds => {
       res.send({
-        feeds
+        feeds: feeds.toJSON()
       });
     })
     .catch(next);
 });
 
 router.get('/feeds/:feed_id', function (req, res, next) {
-  return getFeed(req.params.feed_id)
+  return new Feed({ id: req.params.feed_id }).fetch()
     .then(feed => {
       if (!feed) {
         throw new NotFoundError('Source Not Found');
       }
       res.send({
-        feeds: [ feed ]
+        feeds: [ feed.toJSON() ]
       });
     })
     .catch(next);
 });
 
-router.get('/sources/:source(\\d+)/articles', function (req, res, next) {
-  const sourceId = req.params.source;
-
-  return getSourceById(sourceId)
+router.get('/sources/:source_id(\\d+)/articles', function (req, res, next) {
+  return new Source({ id: req.params.source_id }).fetch()
     .then(source => {
       if (!source) {
         throw new NotFoundError('Source Not Found');
       }
-      return getArticlesFromFeed(source.feed_id, req.query.limit)
+      return source.findOrImportArticles(req.query.limit)
         .then((articles) => {
           res.send({
-            source,
-            articles: articles
+            source: source.toJSON(),
+            articles: articles.toJSON()
           });
         });
     })
     .catch(next);
 });
 
-router.get('/sources/:source/articles', function (req, res, next) {
-  const sourceKey = req.params.source;
-
-  return getSourceByKey(sourceKey)
+router.get('/sources/:source_key/articles', function (req, res, next) {
+  return new Source({ key: req.params.source_key }).fetch()
     .then(source => {
       if (!source) {
         throw new NotFoundError('Source Not Found');
       }
-      return getArticlesFromFeed(source.feed_id, req.query.limit)
+      return source.findOrImportArticles(req.query.limit)
         .then((articles) => {
           res.send({
-            source,
-            articles: articles
+            source: source.toJSON(),
+            articles: articles.toJSON()
           });
         });
     })
@@ -125,7 +117,14 @@ router.get('/articles', function (req, res, next) {
     throw new BadRequestError('Missing feed Parameter');
   }
 
-  return getArticlesFromFeed(feed)
+  return new Feed({ url: feed }).fetch()
+    .then(feed => {
+      if (!feed) {
+        return Feed.save({ url: feed });
+      }
+      return feed;
+    })
+    .then(feed => feed.findOrImportArticles())
     .then((articles) => {
       res.send({
         articles
@@ -135,10 +134,10 @@ router.get('/articles', function (req, res, next) {
 });
 
 router.get('/articles/:guid', function (req, res, next) {
-  return getArticleByGUID(req.params.guid)
+  return new Article({ guid: req.params.guid }).findOrImport()
     .then((article) => {
       res.send({
-        articles: [ article ]
+        articles: [ article.toJSON() ]
       });
     })
     .catch(next);
